@@ -14,25 +14,19 @@ class DashboardController extends Controller
 {
     public function index()
     {
-        // Menghitung jumlah karyawan dari tabel karyawans
         $jumlahPegawai = Karyawan::count();
-
-        // Menghitung jumlah admin dari tabel users
         $jumlahAdmin = User::where('role', 'admin')->count();
-
-        // Menghitung jumlah jabatan dari tabel jabatans (lebih akurat)
         $jumlahJabatan = Jabatan::count();
-        
-        // Menghitung jumlah kehadiran dengan status 'Hadir' untuk HARI INI
+
         $jumlahKehadiran = Kehadiran::where('status_kehadiran', 'Hadir')
-                                  ->whereDate('tanggal', Carbon::today())
-                                  ->count();
+            ->whereDate('tanggal', Carbon::today())
+            ->count();
 
         // Mengirim semua data ke view
         return view('admin.dashboard', compact(
-            'jumlahPegawai', 
-            'jumlahAdmin', 
-            'jumlahJabatan', 
+            'jumlahPegawai',
+            'jumlahAdmin',
+            'jumlahJabatan',
             'jumlahKehadiran'
         ));
     }

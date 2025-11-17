@@ -30,6 +30,14 @@ Route::get('/', function () {
 });
 
 
+// API untuk generate NIP
+Route::get('/api/get-last-nip', function () {
+    $lastKaryawan = \App\Models\Karyawan::orderBy('id', 'desc')->first();
+    return response()->json([
+        'last_nip' => $lastKaryawan ? $lastKaryawan->nip : '0000000000'
+    ]);
+})->name('api.get-last-nip');
+
 // --- Rute Otentikasi ---
 Route::middleware('guest')->group(function () {
     Route::get('/login', [AuthController::class, 'showLoginForm'])->name('login');

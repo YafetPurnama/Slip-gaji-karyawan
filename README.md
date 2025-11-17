@@ -74,7 +74,7 @@ npm install && npm run build
 ### 3️⃣ Konfigurasi Environment
 
 -   Salin file .env.example menjadi .env
--   Buat database baru, misalnya: sistem_penggajian
+-   Buat database baru sesuai dengan .env.example
 -   Sesuaikan konfigurasi DB di file .env
 
 ### 4️⃣ Migrasi & Setup

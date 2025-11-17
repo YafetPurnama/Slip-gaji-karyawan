@@ -4,11 +4,11 @@ namespace App\Http\Controllers\Admin;
 
 use App\Http\Controllers\Controller;
 use App\Models\Jabatan;
-use Illuminate\Http\Request; // <-- Pastikan ini di-import
+use Illuminate\Http\Request;
 
 class JabatanController extends Controller
 {
-    public function index(Request $request) // <-- Tambahkan Request $request
+    public function index(Request $request)
     {
         $query = Jabatan::query();
 
@@ -18,13 +18,9 @@ class JabatanController extends Controller
         }
 
         $jabatans = $query->latest()->paginate(10);
-
-        // Jika ini adalah permintaan AJAX, kembalikan hanya bagian tabelnya saja
         if ($request->ajax()) {
             return view('admin.jabatan.partials.table', compact('jabatans'))->render();
         }
-
-        // Jika bukan, kembalikan halaman lengkap seperti biasa
         return view('admin.jabatan.index', compact('jabatans'));
     }
 
@@ -37,10 +33,14 @@ class JabatanController extends Controller
     {
         $validatedData = $request->validate([
             'nama_jabatan' => 'required|string|unique:jabatans,nama_jabatan|max:255',
-            'gaji_pokok' => 'required|numeric',
-            'tunjangan_transport' => 'required|numeric',
-            'uang_makan' => 'required|numeric',
+            'gaji_pokok' => 'required|string',
+            'tunjangan_transport' => 'required|string',
+            'uang_makan' => 'required|string',
         ]);
+
+        $validatedData['gaji_pokok'] = (int) str_replace('.', '', $validatedData['gaji_pokok']);
+        $validatedData['tunjangan_transport'] = (int) str_replace('.', '', $validatedData['tunjangan_transport']);
+        $validatedData['uang_makan'] = (int) str_replace('.', '', $validatedData['uang_makan']);
 
         Jabatan::create($validatedData);
 
