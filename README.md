@@ -61,7 +61,7 @@ Dirancang untuk mempermudah administrasi mulai dari **data karyawan, absensi, hi
 
 ```bash
 git clone https://gitlab.com/YafetPurnama/slip-gaji-karyawan.git
-cd sistem-penggajian
+cd slip-gaji-karyawan
 ```
 
 ### 2️⃣ Instal Dependensi
