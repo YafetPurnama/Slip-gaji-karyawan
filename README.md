@@ -103,17 +103,6 @@ php artisan tinker
 php artisan serve
 ```
 
-Buka di browser → http://127.0.0.1:8000
+Optional! Buka di browser → http://127.0.0.1:8000
 
 ---
-
-## 🤝 Ingin Berkontribusi?
-
-Kontribusi Anda sangat kami harapkan! Baik itu berupa ide, laporan bug, atau pull request.
-
--   **Fork repository ini.**
--   **Buat Branch baru (git checkout -b fitur/NamaFiturAnda).**
--   **Commit perubahan Anda (git commit -m 'Menambahkan fitur keren').**
--   **Push ke branch Anda (git push origin fitur/NamaFiturAnda).**
--   **Buat Pull Request baru.**
--   **Pastikan untuk mengikuti panduan kontribusi (jika ada file CONTRIBUTING.md).**

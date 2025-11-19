@@ -14,6 +14,16 @@ class Jabatan extends Model
         'gaji_pokok',
         'tunjangan_transport',
         'uang_makan',
+        'uang_bpjs',
+        'uang_lembur',
+    ];
+    
+    protected $casts = [
+        'gaji_pokok' => 'decimal:2',
+        'tunjangan_transport' => 'decimal:2',
+        'uang_makan' => 'decimal:2',
+        'uang_bpjs' => 'decimal:2',
+        'uang_lembur' => 'decimal:2',
     ];
     public function karyawans()
     {

@@ -1,0 +1,101 @@
+File Awal setelah run command terminal : php artisan make:mail SlipGajiEmail
+
+<?php
+
+namespace App\Mail;
+
+use Illuminate\Bus\Queueable;
+use Illuminate\Contracts\Queue\ShouldQueue;
+use Illuminate\Mail\Mailable;
+use Illuminate\Mail\Mailables\Content;
+use Illuminate\Mail\Mailables\Envelope;
+use Illuminate\Queue\SerializesModels;
+
+class SlipGajiEmail extends Mailable
+{
+    use Queueable, SerializesModels;
+
+    /**
+     * Create a new message instance.
+     */
+    public function __construct()
+    {
+        //
+    }
+
+    /**
+     * Get the message envelope.
+     */
+    public function envelope(): Envelope
+    {
+        return new Envelope(
+            subject: 'Slip Gaji Email',
+        );
+    }
+
+    /**
+     * Get the message content definition.
+     */
+    public function content(): Content
+    {
+        return new Content(
+            view: 'view.name',
+        );
+    }
+
+    /**
+     * Get the attachments for the message.
+     *
+     * @return array<int, \Illuminate\Mail\Mailables\Attachment>
+     */
+    public function attachments(): array
+    {
+        return [];
+    }
+}
+
+
+
+------------------ Berikut code terakhir dari C:\laragon\www\slip-gaji-karyawan\app\Mail\SlipGajiEmail.php
+
+<?php
+
+namespace App\Mail;
+
+use Illuminate\Bus\Queueable;
+use Illuminate\Mail\Mailable;
+use Illuminate\Queue\SerializesModels;
+
+class SlipGajiEmail extends Mailable
+{
+    use Queueable, SerializesModels;
+
+    public $data;
+
+    // Kita terima data gaji dari controller
+    public function __construct($data)
+    {
+        $this->data = $data;
+    }
+
+    public function build()
+    {
+        // $bulan = \Carbon\Carbon::create()->month($this->data['bulan'])->translatedFormat('F');
+        // return $this->subject('Slip Gaji Periode ' . $bulan . ' ' . $this->data['tahun'])
+        //     ->view('admin.slip-gaji.print') // Kita reuse view print yang sudah ada agar desain sama
+        //     ->with([
+        //         'data_gaji' => $this->data['data_gaji'],
+        //     ]);
+
+        // Create a Carbon instance with the numeric month and year
+        $date = \Carbon\Carbon::create($this->data['tahun'], $this->data['bulan'], 1);
+        $bulanIndo = $date->translatedFormat('F');
+
+        return $this->subject('Slip Gaji Periode ' . $bulanIndo . ' ' . $this->data['tahun'])
+            ->view('admin.slip-gaji.print')
+            ->with([
+                'slipData' => $this->data['data_gaji']
+            ]);
+    }
+}
+

@@ -126,6 +126,8 @@
             border-radius: 50%;
             animation: spin 1s linear infinite;
             margin-right: 10px;
+            display: none;
+            /* Pastikan spinner disembunyikan secara default */
         }
 
         @keyframes spin {
@@ -154,7 +156,6 @@
                     required>
             </div>
 
-            {{-- Menampilkan pesan error dari AJAX --}}
             <div id="errorMessage" class="error-message"></div>
 
             <button type="submit" class="btn-submit mt-4">
@@ -169,7 +170,7 @@
     <script>
         $(document).ready(function() {
             $('#loginForm').on('submit', function(event) {
-                event.preventDefault(); // Mencegah form dikirim secara tradisional
+                event.preventDefault();
 
                 let form = $(this);
                 let button = form.find('.btn-submit');
@@ -179,6 +180,7 @@
 
                 // Hapus pesan error lama dan tampilkan loading
                 errorMessage.hide().text('');
+                spinner.css('display', 'inline-block'); // Tampilkan spinner
                 spinner.removeClass('d-none');
                 btnText.text('Logging in...');
                 button.attr('disabled', true);
@@ -188,11 +190,9 @@
                     method: 'POST',
                     data: form.serialize(),
                     success: function(response) {
-                        // Jika sukses, arahkan ke URL yang diberikan
                         window.location.href = response.redirect;
                     },
                     error: function(xhr) {
-                        // Jika ada error validasi atau lainnya
                         if (xhr.status === 422) {
                             let errorMsg = xhr.responseJSON.message ||
                                 'Terjadi kesalahan validasi.';

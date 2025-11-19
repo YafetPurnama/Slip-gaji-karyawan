@@ -15,6 +15,7 @@ class Karyawan extends Model
      * @var array<int, string>
      */
     protected $fillable = [
+        'user_id',
         'nip',
         'nama_lengkap',
         'jenis_kelamin',
@@ -27,10 +28,16 @@ class Karyawan extends Model
 
     public function user()
     {
-        return $this->belongsTo(User::class);
+        // return $this->belongsTo(User::class);
+        return $this->belongsTo(User::class, 'user_id');
     }
     public function jabatan()
     {
         return $this->belongsTo(Jabatan::class);
+    }
+
+    public function kehadirans()
+    {
+        return $this->hasMany(Kehadiran::class, 'karyawan_id');
     }
 }

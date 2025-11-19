@@ -73,6 +73,38 @@
                     @enderror
                 </div>
 
+                <div class="form-group">
+                    <label for="uang_bpjs">BPJS Ketenagakerjaan (per bulan)</label>
+                    <div class="input-group">
+                        <div class="input-group-prepend">
+                            <span class="input-group-text">Rp</span>
+                        </div>
+                        <input type="text" name="uang_bpjs" id="uang_bpjs"
+                            class="form-control currency-input @error('uang_bpjs') is-invalid @enderror"
+                            value="{{ old('uang_bpjs') ? number_format(old('uang_bpjs'), 0, ',', '.') : '0' }}"
+                            onkeyup="formatCurrency(this)" required>
+                    </div>
+                    @error('uang_bpjs')
+                        <div class="invalid-feedback d-block">{{ $message }}</div>
+                    @enderror
+                </div>
+
+                <div class="form-group">
+                    <label for="uang_lembur">Uang Lembur (per hari)</label>
+                    <div class="input-group">
+                        <div class="input-group-prepend">
+                            <span class="input-group-text">Rp</span>
+                        </div>
+                        <input type="text" name="uang_lembur" id="uang_lembur"
+                            class="form-control currency-input @error('uang_lembur') is-invalid @enderror"
+                            value="{{ old('uang_lembur') ? number_format(old('uang_lembur'), 0, ',', '.') : '0' }}"
+                            onkeyup="formatCurrency(this)" required>
+                    </div>
+                    @error('uang_lembur')
+                        <div class="invalid-feedback d-block">{{ $message }}</div>
+                    @enderror
+                </div>
+
                 <button type="submit" class="btn btn-primary">Simpan</button>
                 <a href="{{ route('jabatan.index') }}" class="btn btn-secondary">Batal</a>
             </form>

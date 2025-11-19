@@ -18,8 +18,15 @@ class AbsensiController extends Controller
         $hariIni = Carbon::today()->toDateString();
 
         $absensiHariIni = Kehadiran::where('tanggal', $hariIni)
-            ->pluck('status_kehadiran', 'karyawan_id')
-            ->all();
+            ->get()
+            ->mapWithKeys(function ($item) {
+                return [
+                    $item->karyawan_id => [
+                        'status_kehadiran' => $item->status_kehadiran,
+                        'status_lembur' => $item->status_lembur ?? 'Tidak'
+                    ]
+                ];
+            })->all();
 
         // 1. Mulai query Karyawan
         $query = Karyawan::with('jabatan')->orderBy('nama_lengkap');
@@ -28,7 +35,7 @@ class AbsensiController extends Controller
         if ($search) {
             $query->where('nama_lengkap', 'like', '%' . $search . '%');
         }
-        
+
         $rekapAbsensi = $query->get();
 
         // 3. Hitung rekap absensi untuk setiap karyawan yang ditemukan
@@ -37,7 +44,7 @@ class AbsensiController extends Controller
                 ->whereMonth('tanggal', $bulan)
                 ->whereYear('tanggal', $tahun)
                 ->where('status_kehadiran', 'Hadir')->count();
-            
+
             $karyawan->jumlah_sakit = Kehadiran::where('karyawan_id', $karyawan->id)
                 ->whereMonth('tanggal', $bulan)
                 ->whereYear('tanggal', $tahun)
@@ -53,21 +60,31 @@ class AbsensiController extends Controller
         if ($request->ajax()) {
             return view('admin.absensi.partials.table', compact('rekapAbsensi', 'absensiHariIni'))->render();
         }
-            
+
         return view('admin.absensi.index', compact('rekapAbsensi', 'absensiHariIni', 'bulan', 'tahun'));
     }
 
     public function store(Request $request)
     {
-        $request->validate(['status' => 'required|array']);
+        $request->validate([
+            'status' => 'required|array',
+            'lembur' => 'nullable|array',
+            'lembur.*' => 'nullable|in:Ya,Tidak',
+        ]);
 
         $tanggal = Carbon::today()->toDateString();
         $statuses = $request->input('status');
+        $lembur = $request->input('lembur', []);
 
         foreach ($statuses as $karyawanId => $status) {
+            $lemburStatus = isset($lembur[$karyawanId]) ? 'Ya' : 'Tidak';
+            
             Kehadiran::updateOrCreate(
                 ['karyawan_id' => $karyawanId, 'tanggal' => $tanggal],
-                ['status_kehadiran' => $status]
+                [
+                    'status_kehadiran' => $status,
+                    'status_lembur' => $lemburStatus
+                ]
             );
         }
 

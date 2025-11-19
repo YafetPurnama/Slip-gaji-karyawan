@@ -13,14 +13,14 @@ class DataGajiController extends Controller
     public function index(Request $request)
     {
         $karyawan = Auth::user()->karyawan;
-        
+
         if (!$karyawan || !$karyawan->jabatan) {
             return view('pegawai.dashboard_kosong');
         }
 
         $bulan = $request->input('bulan', date('m'));
         $tahun = $request->input('tahun', date('Y'));
-            
+
         $detailGaji = $this->hitungGajiPeriode($karyawan, $bulan, $tahun);
 
         if ($request->ajax()) {
@@ -68,12 +68,21 @@ class DataGajiController extends Controller
 
         // C. Jumlahkan semua potongan
         $totalSemuaPotongan = $totalPotonganAlpha + $potonganLainnya;
-        
-        // D. Hitung Gaji
+
+        // D. Hitung Uang Lembur
+        $jumlahLembur = Kehadiran::where('karyawan_id', $karyawan->id)
+            ->whereMonth('tanggal', $bulan)
+            ->whereYear('tanggal', $tahun)
+            ->where('status_lembur', 'Ya')
+            ->count();
+        $uangLembur = $jumlahLembur * ($karyawan->jabatan->uang_lembur ?? 0);
+
+        // E. Hitung Gaji
         $gajiPokok = $karyawan->jabatan->gaji_pokok;
         $tunjanganTransport = $karyawan->jabatan->tunjangan_transport;
         $uangMakan = $karyawan->jabatan->uang_makan;
-        $gajiKotor = $gajiPokok + $tunjanganTransport + $uangMakan;
+        $bpjsKetenagakerjaan = $karyawan->jabatan->uang_bpjs ?? 0;
+        $gajiKotor = $gajiPokok + $tunjanganTransport + $uangMakan - $bpjsKetenagakerjaan + $uangLembur;
         $gajiBersih = $gajiKotor - $totalSemuaPotongan;
 
         $data = (object) [
@@ -83,6 +92,9 @@ class DataGajiController extends Controller
             'gaji_pokok' => $gajiPokok,
             'tunjangan_transport' => $tunjanganTransport,
             'uang_makan' => $uangMakan,
+            'bpjs_ketenagakerjaan' => $bpjsKetenagakerjaan,
+            'uang_lembur' => $uangLembur,
+            'jumlah_lembur' => $jumlahLembur,
             'gaji_kotor' => $gajiKotor,
             'total_potongan' => $totalSemuaPotongan,
             'gaji_bersih' => $gajiBersih,

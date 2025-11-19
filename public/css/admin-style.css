@@ -131,3 +131,46 @@ a {
     font-size: 0.9rem;
     color: #6c757d;
 }
+
+/* =============== Pagination Styling =============== */
+.pagination {
+    justify-content: flex-end; /* Ganti 'center' jika ingin di tengah */
+    margin-top: 20px;
+}
+
+/* Jika kamu ingin MENGHILANGKAN tombol Previous ( < ) dan Next ( > )
+   dan hanya menampilkan angka halaman saja */
+.page-item:first-child .page-link,
+.page-item:last-child .page-link {
+    display: none; /* Ini akan menyembunyikan tombol < dan > */
+}
+
+/* Mempercantik tampilan link pagination */
+.page-link {
+    color: #2c3e50; /* Sesuaikan dengan warna sidebar */
+    border: 1px solid #dee2e6;
+}
+
+.page-item.active .page-link {
+    background-color: #2c3e50; /* Warna sidebar saat aktif */
+    border-color: #2c3e50;
+    color: white;
+}
+/* =============== STICKY FOOTER FIX =============== */
+/* 1. Memastikan wrapper utama minimal setinggi layar browser */
+#content-wrapper {
+    min-height: 100vh !important;
+    display: flex;
+    flex-direction: column;
+}
+
+/* 2. Memaksa area konten utama untuk "mekar" (grow) mengisi ruang kosong */
+/* Ini yang bikin footer terdorong ke bawah meski datanya sedikit */
+#content {
+    flex: 1 0 auto;
+}
+
+/* 3. Footer tidak boleh menyusut */
+footer.sticky-footer {
+    flex-shrink: 0;
+}

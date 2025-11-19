@@ -13,6 +13,16 @@ class Kehadiran extends Model
         'karyawan_id',
         'tanggal',
         'status_kehadiran',
+        'status_lembur',
+    ];
+
+    protected $casts = [
+        'status_lembur' => 'string',
+        'tanggal' => 'date',
+    ];
+    
+    protected $attributes = [
+        'status_lembur' => 'tidak',
     ];
 
     public function karyawan()

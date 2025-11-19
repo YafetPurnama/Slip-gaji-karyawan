@@ -23,6 +23,14 @@
           <th>Uang Makan</th>
           <td class="text-right">Rp {{ number_format($detailGaji->uang_makan, 0, ',', '.') }}</td>
         </tr>
+        <tr>
+          <th>BPJS Ketenagakerjaan</th>
+          <td class="text-right">Rp {{ number_format($detailGaji->bpjs_ketenagakerjaan, 0, ',', '.') }}</td>
+        </tr>
+        <tr>
+          <th>Uang Lembur ({{ $detailGaji->jumlah_lembur }}x)</th>
+          <td class="text-right">Rp {{ number_format($detailGaji->uang_lembur, 0, ',', '.') }}</td>
+        </tr>
         <tr class="border-top">
           <th>Total Penerimaan</th>
           <th class="text-right">Rp {{ number_format($detailGaji->gaji_kotor, 0, ',', '.') }}</th>

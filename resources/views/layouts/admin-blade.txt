@@ -37,17 +37,20 @@
             position: relative;
         }
 
-        /* 2. SIDEBAR BASE (Desktop Default: Muncul) */
+        /* 2. SIDEBAR BASE */
         .sidebar {
             width: 16rem;
-            /* 250px */
+            /* width penuh (desktop) */
             min-height: 100vh;
             background-color: #4e73df;
-            transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
-            /* Animasi lebih natural */
-            z-index: 1040;
-            /* Pastikan di atas konten standard */
-            position: relative;
+            transition: width 0.3s ease, margin 0.3s ease;
+            z-index: 1000;
+            position: fixed;
+            left: 0;
+            top: 0;
+            bottom: 0;
+            overflow-y: auto;
+            /* position: relative; */
         }
 
         /* 3. CONTENT WRAPPER */
@@ -55,28 +58,91 @@
             flex: 1;
             display: flex;
             flex-direction: column;
-            /* width: 0; */
             width: 100%;
-            /* Fix flexbox overflow issue */
             min-width: 0;
-            /* transition: margin 0.3s ease; */
+            min-height: 100vh;
+            margin-left: 16rem;
+            /* default: ikut width sidebar penuh */
+            background-color: #f8f9fc;
             transition: margin 0.3s cubic-bezier(0.4, 0, 0.2, 1);
             overflow-x: hidden;
         }
 
-        /* --- LOGIKA DESKTOP (Screen > 768px) --- */
-        @media (min-width: 768px) {
+        /* 4. NAVBAR */
+        .topbar {
+            position: sticky;
+            top: 0;
+            z-index: 100;
+            background: #fff;
+            box-shadow: 0 0.15rem 1.75rem 0 rgba(58, 59, 69, 0.15);
+        }
+
+        /* 5. SIDEBAR TOGGLED STATE */
+        body.sidebar-toggled .sidebar {
+            margin-left: -16rem;
+        }
+
+        body.sidebar-toggled #content-wrapper {
+            margin-left: 0;
+        }
+
+        /* 6. RESPONSIVE */
+        @media (max-width: 768px) {
             .sidebar {
-                position: relative;
-                /* Sidebar ikut aliran dokumen */
-                margin-left: 0;
-                /* Default Muncul */
+                margin-left: -250px;
+                /* default: sembunyi di kiri */
             }
 
-            /* Saat tombol ditekan di desktop (Sidebar disembunyikan) */
+            #content-wrapper {
+                margin-left: 0;
+            }
+
             body.sidebar-toggled .sidebar {
-                margin-left: -16rem !important;
-                /* Sidebar geser ke kiri sampai hilang, TAPI navbar tetap di kanan */
+                margin-left: 0;
+                /* saat toggled: masuk ke layar */
+            }
+
+            body.sidebar-toggled #content-wrapper {
+                margin-left: 0;
+            }
+        }
+
+        /* @media (max-width: 767.98px) {
+            .sidebar {
+                position: fixed;
+                top: 0;
+                left: 0;
+                height: 100vh;
+                margin-left: -16rem;
+                z-index: 2000;
+                box-shadow: 4px 0 24px rgba(0, 0, 0, 0.15);
+            }
+        } */
+
+
+        /* --- LOGIKA DESKTOP (Screen > 768px) --- */
+        @media (min-width: 768px) {
+
+            /* Normal: sidebar penuh */
+            .sidebar {
+                position: fixed;
+                left: 0;
+                top: 0;
+                bottom: 0;
+                width: 16rem;
+            }
+
+            #content-wrapper {
+                margin-left: 16rem;
+            }
+
+            /* Toggled: sidebar MINIMIZE (ikon saja) */
+            body.sidebar-toggled .sidebar {
+                width: 4.5rem;
+            }
+
+            body.sidebar-toggled #content-wrapper {
+                margin-left: 4.5rem;
             }
         }
 
