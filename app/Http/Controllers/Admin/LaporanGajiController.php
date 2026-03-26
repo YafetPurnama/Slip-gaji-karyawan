@@ -18,18 +18,54 @@ class LaporanGajiController extends Controller
 {
     public function index(Request $request)
     {
-        $bulan = $request->input('bulan', date('m'));
-        $tahun = $request->input('tahun', date('Y'));
+        // $bulan = $request->input('bulan', date('m'));
+        // $tahun = $request->input('tahun', date('Y'));
+        $bulan  = (int) $request->input('bulan', date('m'));
+        $tahun  = (int) $request->input('tahun', date('Y'));
         $search = $request->input('search');
 
         $laporanGaji = $this->hitungGajiPeriode($bulan, $tahun, $search);
 
+        $bulanNama = Carbon::createFromDate($tahun, $bulan, 1)->translatedFormat('F');
+
+
+        // if ($request->ajax()) {
+        //     return view('admin.laporan.gaji.partials.table', compact('laporanGaji', 'bulan', 'tahun'))->render();
+        // }
+
+        // return view('admin.laporan.gaji.index', compact('laporanGaji', 'bulan', 'tahun'));
         if ($request->ajax()) {
-            return view('admin.laporan.gaji.partials.table', compact('laporanGaji', 'bulan', 'tahun'))->render();
+            return view('admin.laporan.gaji.partials.table', compact(
+                'laporanGaji',
+                'bulan',
+                'tahun',
+                'bulanNama'
+            ))->render();
         }
 
-        return view('admin.laporan.gaji.index', compact('laporanGaji', 'bulan', 'tahun'));
+        return view('admin.laporan.gaji.index', compact(
+            'laporanGaji',
+            'bulan',
+            'tahun',
+            'bulanNama'
+        ));
     }
+
+    // public function print(Request $request)
+    // {
+    //     $request->validate([
+    //         'bulan' => 'required',
+    //         'tahun' => 'required|numeric|digits:4',
+    //     ]);
+
+    //     $bulan = $request->input('bulan');
+    //     $tahun = $request->input('tahun');
+    //     $search = $request->input('search');
+
+    //     $laporanGaji = $this->hitungGajiPeriode($bulan, $tahun, $search);
+
+    //     return view('admin.laporan.gaji.print', compact('laporanGaji', 'bulan', 'tahun'));
+    // }
 
     public function print(Request $request)
     {
@@ -38,13 +74,21 @@ class LaporanGajiController extends Controller
             'tahun' => 'required|numeric|digits:4',
         ]);
 
-        $bulan = $request->input('bulan');
-        $tahun = $request->input('tahun');
+        $bulan  = (int) $request->input('bulan');
+        $tahun  = (int) $request->input('tahun');
         $search = $request->input('search');
 
         $laporanGaji = $this->hitungGajiPeriode($bulan, $tahun, $search);
 
-        return view('admin.laporan.gaji.print', compact('laporanGaji', 'bulan', 'tahun'));
+        // PERBAIKAN: pakai bulan/tahun dari filter
+        $bulanNama = Carbon::createFromDate($tahun, $bulan, 1)->translatedFormat('F');
+
+        return view('admin.laporan.gaji.print', compact(
+            'laporanGaji',
+            'bulan',
+            'tahun',
+            'bulanNama'          // <- dikirim ke view print
+        ));
     }
 
     public function export(Request $request)
@@ -78,7 +122,7 @@ class LaporanGajiController extends Controller
     private function hitungGajiPeriode($bulan, $tahun, $search = null)
     {
         $endOfSelectedMonth = Carbon::createFromDate($tahun, $bulan, 1)->endOfMonth();
-        
+
         $query = Karyawan::with('jabatan')
             ->whereDate('tanggal_masuk', '<=', $endOfSelectedMonth);
 
@@ -178,15 +222,14 @@ class LaporanGajiController extends Controller
             // 6) GAJI BERSIH
             // ========================
 
-            // Gaji kotor = gaji_pokok + tunjangan transport + uang makan - BPJS Ketenagakerjaan + uang lembur
+            // Gaji kotor = gaji_pokok + tunjangan transport + uang makan + uang lembur
             $gajiKotor = $gajiPokok
                 + $tunjanganTransport
                 + $uangMakan
-                - $uangBpjs
                 + $totalLembur;
 
-            // Gaji bersih = gaji kotor - potongan Alpha - potongan lain
-            $gajiBersih = $gajiKotor - $potonganAlpha - $potonganLainnya;
+            // Gaji bersih = gaji kotor - BPJS Ketenagakerjaan - potongan Alpha - potongan lain
+            $gajiBersih = $gajiKotor - $uangBpjs - $potonganAlpha - $potonganLainnya;
 
             $dataGaji[] = (object) [
                 'karyawan'   => $karyawan,

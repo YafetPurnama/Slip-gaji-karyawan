@@ -17,11 +17,11 @@ class DataGajiController extends Controller
         // 2. Terapkan filter pencarian jika ada
         if ($request->has('search') && $request->search != '') {
             $query->where('nama_lengkap', 'like', '%' . $request->search . '%')
-                  ->orWhere('nip', 'like', '%' . $request->search . '%');
+                ->orWhere('nip', 'like', '%' . $request->search . '%');
         }
 
         $karyawans = $query->latest()->paginate(10);
-        
+
         // 3. Hitung Gaji Kotor untuk setiap karyawan
         $karyawans->getCollection()->transform(function ($karyawan) {
             if ($karyawan->jabatan instanceof Jabatan) {
@@ -29,19 +29,19 @@ class DataGajiController extends Controller
                 $karyawan->gaji_pokok = $karyawan->jabatan->gaji_pokok;
                 $karyawan->tunjangan_transport = $karyawan->jabatan->tunjangan_transport;
                 $karyawan->uang_makan = $karyawan->jabatan->uang_makan;
-                
+
                 // BPJS Ketenagakerjaan (JHT + JKK + JKM)
                 $bpjs_ketenagakerjaan = 0;
                 if (isset($karyawan->jabatan->uang_bpjs)) {
                     $bpjs_ketenagakerjaan = $karyawan->jabatan->uang_bpjs;
                 }
-                
+
                 // Hitung Gaji Kotor (Gaji Pokok + Tunjangan Transport + Uang Makan - BPJS Ketenagakerjaan)
-                $karyawan->gaji_kotor = $karyawan->gaji_pokok + 
-                                      $karyawan->tunjangan_transport + 
-                                      $karyawan->uang_makan - 
-                                      $bpjs_ketenagakerjaan;
-                                      
+                $karyawan->gaji_kotor = $karyawan->gaji_pokok +
+                    $karyawan->tunjangan_transport +
+                    $karyawan->uang_makan -
+                    $bpjs_ketenagakerjaan;
+
                 // Simpan nilai BPJS Ketenagakerjaan untuk ditampilkan
                 $karyawan->bpjs_ketenagakerjaan = $bpjs_ketenagakerjaan;
             } else {

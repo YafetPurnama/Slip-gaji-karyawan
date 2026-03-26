@@ -40,10 +40,11 @@
         /* 2. SIDEBAR BASE (Desktop Default: Muncul) */
         .sidebar {
             width: 16rem;
+            min-width: 16rem; /* Mencegah penyusutan tak wajar */
             /* 250px */
             min-height: 100vh;
             background-color: #4e73df;
-            transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+            transition: width 0.3s cubic-bezier(0.4, 0, 0.2, 1), min-width 0.3s cubic-bezier(0.4, 0, 0.2, 1), transform 0.3s cubic-bezier(0.4, 0, 0.2, 1);
             /* Animasi lebih natural */
             z-index: 1040;
             /* Pastikan di atas konten standard */
@@ -55,12 +56,9 @@
             flex: 1;
             display: flex;
             flex-direction: column;
-            /* width: 0; */
             width: 100%;
             /* Fix flexbox overflow issue */
             min-width: 0;
-            /* transition: margin 0.3s ease; */
-            transition: margin 0.3s cubic-bezier(0.4, 0, 0.2, 1);
             overflow-x: hidden;
         }
 
@@ -73,10 +71,11 @@
                 /* Default Muncul */
             }
 
-            /* Saat tombol ditekan di desktop (Sidebar disembunyikan) */
+            /* Saat tombol ditekan di desktop (Sidebar disembunyikan area width jadi 0) */
             body.sidebar-toggled .sidebar {
-                margin-left: -16rem !important;
-                /* Sidebar geser ke kiri sampai hilang, TAPI navbar tetap di kanan */
+                width: 0 !important;
+                min-width: 0 !important;
+                overflow: hidden;
             }
         }
 
@@ -88,22 +87,21 @@
                 top: 0;
                 left: 0;
                 height: 100vh;
-                margin-left: -16rem;
-                /* Default: Sembunyi di kiri */
+                transform: translateX(-100%);
+                /* Sembunyi di kiri dengan transform yang smooth */
                 z-index: 2000;
                 /* WAJIB Lebih tinggi dari Navbar */
-                /* box-shadow: 0 .5rem 1rem rgba(0, 0, 0, .15); */
                 box-shadow: 4px 0 24px rgba(0, 0, 0, 0.15);
             }
 
             /* Saat tombol ditekan di mobile (Sidebar dimunculkan) */
-            body.sidebar-toggled .sidebar {
-                margin-left: 0 !important;
+            body.sidebar-open .sidebar {
+                transform: translateX(0);
                 /* Geser masuk ke layar */
             }
 
             /* Backdrop Gelap saat menu mobile aktif */
-            body.sidebar-toggled::after {
+            body.sidebar-open::after {
                 content: "";
                 position: fixed;
                 top: 0;

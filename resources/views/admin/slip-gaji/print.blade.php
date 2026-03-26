@@ -211,9 +211,15 @@
                             <td>Uang Makan</td>
                             <td>Rp {{ number_format($slipData->uang_makan, 0, ',', '.') }}</td>
                         </tr>
+                        <tr>
+                            <td>Uang Lembur ({{ $slipData->jumlah_lembur ?? 0 }}x)</td>
+                            <td>Rp {{ number_format($slipData->uang_lembur ?? 0, 0, ',', '.') }}</td>
+                        </tr>
                         <tr class="total-row">
                             <td>Total Penerimaan</td>
-                            <td>Rp {{ number_format($slipData->gaji_kotor, 0, ',', '.') }}</td>
+                            <td>Rp
+                                {{ number_format($slipData->gaji_pokok + $slipData->tunjangan_transport + $slipData->uang_makan + ($slipData->uang_lembur ?? 0), 0, ',', '.') }}
+                            </td>
                         </tr>
                     </tbody>
                 </table>
@@ -226,6 +232,13 @@
                         </tr>
                     </thead>
                     <tbody>
+                        @if ($slipData->bpjs_ketenagakerjaan > 0)
+                            <tr>
+                                <td>BPJS Ketenagakerjaan</td>
+                                <td class="text-danger">- Rp
+                                    {{ number_format($slipData->bpjs_ketenagakerjaan, 0, ',', '.') }}</td>
+                            </tr>
+                        @endif
                         @if ($slipData->potongan_alpha->total > 0)
                             <tr>
                                 <td>Alpha ({{ $slipData->potongan_alpha->jumlah_hari }} hari)</td>
@@ -241,8 +254,14 @@
                         @endforeach
                         <tr class="total-row">
                             <td>Total Potongan</td>
-                            <td class="text-danger">- Rp {{ number_format($slipData->total_potongan, 0, ',', '.') }}
+                            <td class="text-danger">- Rp
+                                {{-- {{ number_format($slipData->total_potongan + $slipData->bpjs_ketenagakerjaan, 0, ',', '.') }} --}}
+                                {{ number_format($slipData->total_potongan, 0, ',', '.') }}
                             </td>
+                        </tr>
+                        <tr class="bg-light text-dark font-weight-bold border-top">
+                            <td>Gaji Bersih Diterima</td>
+                            <td class="text-right">Rp {{ number_format($slipData->gaji_bersih, 0, ',', '.') }}</td>
                         </tr>
                     </tbody>
                 </table>

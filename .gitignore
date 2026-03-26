@@ -19,9 +19,14 @@
 /storage/*.key
 /storage/pail
 /vendor
+
+/package-lock.json
+cover.png
 Homestead.json
 Homestead.yaml
 Thumbs.db
 info.txt
 env.txt
-
+/info.txt
+/db_sistem_penggajian.sql
+summary.md

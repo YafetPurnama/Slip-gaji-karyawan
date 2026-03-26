@@ -58,7 +58,8 @@
                                 </tr>
                                 <tr>
                                     <td>BPJS Ketenagakerjaan</td>
-                                    <td class="text-right font-weight-bold">Rp
+                                    {{-- <td class="text-right font-weight-bold">Rp --}}
+                                    <td class="text-right font-weight-bold text-danger">- Rp
                                         {{ number_format($dataGaji->bpjs_ketenagakerjaan, 0, ',', '.') }}</td>
                                 </tr>
                                 <tr>

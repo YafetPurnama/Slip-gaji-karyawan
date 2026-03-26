@@ -6,8 +6,8 @@
     <i class="fa fa-bars"></i>
   </button>
 
-  <!-- Tombol Toggle untuk Mobile (Bawaan Template) -->
-  <button id="sidebarToggleTop" class="btn btn-link d-md-none rounded-circle mr-3">
+  <!-- Tombol Toggle untuk Mobile (Bawaan Template diganti ID agar tidak bentrok sb-admin-2.js) -->
+  <button id="btnMobileToggle" class="btn btn-link d-md-none rounded-circle mr-3">
     <i class="fa fa-bars"></i>
   </button>
 

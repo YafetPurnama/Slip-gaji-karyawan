@@ -6,3 +6,8 @@ Pass: 12345678
 
 Email: teddywu714@gmail.com
 Pass: Teddy123
+
+Email: admin@gmail.com
+Pass:admin123 -> 123456
+
+php artisan serve --no-reload

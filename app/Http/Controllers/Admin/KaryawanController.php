@@ -3,12 +3,13 @@
 namespace App\Http\Controllers\Admin;
 
 use App\Http\Controllers\Controller;
+use App\Models\Jabatan;
 use App\Models\Karyawan;
 use App\Models\User;
-use App\Models\Jabatan; // <-- Tambahkan Jabatan model
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\DB;
 use Illuminate\Support\Facades\Hash;
+use Illuminate\Support\Facades\Log;
 use Illuminate\Support\Facades\Storage;
 use Illuminate\Validation\Rules;
 
@@ -19,8 +20,8 @@ class KaryawanController extends Controller
         $query = Karyawan::query()->with(['user', 'jabatan']);
 
         if ($request->has('search')) {
-            $query->where('nama_lengkap', 'like', '%' . $request->search . '%')
-                  ->orWhere('nip', 'like', '%' . $request->search . '%');
+            $query->where('nama_lengkap', 'like', '%'.$request->search.'%')
+                ->orWhere('nip', 'like', '%'.$request->search.'%');
         }
 
         $karyawans = $query->latest()->paginate(10);
@@ -38,22 +39,33 @@ class KaryawanController extends Controller
     {
         // Ambil data jabatan untuk dropdown
         $jabatans = Jabatan::orderBy('nama_jabatan')->get();
+
         return view('admin.karyawan.create', compact('jabatans'));
     }
 
     public function store(Request $request)
     {
+
         $validatedData = $request->validate([
-            'nip' => 'required|unique:karyawans,nip|max:20',
+            'nip' => 'required|numeric|digits_between:8,13|unique:karyawans,nip',
             'nama_lengkap' => 'required|string|max:255',
             'jenis_kelamin' => 'required|in:Laki-laki,Perempuan',
-            'jabatan_id' => 'required|exists:jabatans,id', // Validasi jabatan_id
-            'foto' => 'nullable|image|mimes:jpeg,png,jpg|max:2048',
+            'jabatan_id' => 'required|exists:jabatans,id',
+            'foto' => 'nullable|image|mimes:jpeg,png,jpg|max:10240',
             'status' => 'required|string|max:255',
             'tanggal_masuk' => 'required|date',
             'nomor_telepon' => 'nullable|string|max:15',
             'email' => 'required|string|email|max:255|unique:users',
             'password' => ['required', 'confirmed', Rules\Password::defaults()],
+        ], [
+            'nip.required' => 'NIP wajib diisi.',
+            'nip.numeric' => 'NIP hanya boleh berisi angka.',
+            'nip.digits_between' => 'NIP harus terdiri dari 8 sampai 13 digit.',
+            'nip.unique' => 'NIP sudah terdaftar di sistem.',
+            'foto.uploaded' => 'Gagal mengunggah foto. Pastikan ukuran file tidak melebihi 10MB.',
+            'foto.max' => 'Ukuran foto maksimal adalah 10MB!',
+            'foto.image' => 'File harus berupa gambar.',
+            'foto.mimes' => 'Format gambar harus jpeg, png, atau jpg.',
         ]);
 
         DB::transaction(function () use ($request, $validatedData) {
@@ -80,28 +92,39 @@ class KaryawanController extends Controller
     public function edit(Karyawan $karyawan)
     {
         $jabatans = Jabatan::orderBy('nama_jabatan')->get();
-        
+
         // Ambil semua user 'pegawai' yang BELUM memiliki data karyawan (user_id nya null)
         $usersBelumTertaut = User::where('role', 'pegawai')
-                                ->whereDoesntHave('karyawan')
-                                ->get();
+            ->whereDoesntHave('karyawan')
+            ->get();
 
         return view('admin.karyawan.edit', compact('karyawan', 'jabatans', 'usersBelumTertaut'));
     }
 
     public function update(Request $request, Karyawan $karyawan)
     {
+
         $validatedData = $request->validate([
-            'nip' => 'required|max:20|unique:karyawans,nip,' . $karyawan->id,
+            'nip' => 'required|numeric|digits_between:8,13|unique:karyawans,nip,'.$karyawan->id,
             'nama_lengkap' => 'required|string|max:255',
             'jenis_kelamin' => 'required|in:Laki-laki,Perempuan',
             'jabatan_id' => 'required|exists:jabatans,id',
-            'foto' => 'nullable|image|mimes:jpeg,png,jpg|max:2048',
+            'foto' => 'nullable|image|mimes:jpeg,png,jpg|max:10240',
             'status' => 'required|string|max:255',
             'tanggal_masuk' => 'required|date',
             'nomor_telepon' => 'nullable|string|max:15',
-            'user_id' => 'nullable|exists:users,id', // Validasi untuk user_id
+            'user_id' => 'nullable|exists:users,id',
+        ], [
+            'nip.required' => 'NIP wajib diisi.',
+            'nip.numeric' => 'NIP hanya boleh berisi angka.',
+            'nip.digits_between' => 'NIP harus terdiri dari 8 sampai 13 digit.',
+            'nip.unique' => 'NIP sudah terdaftar di sistem.',
+            'foto.uploaded' => 'Gagal mengunggah foto. Pastikan ukuran file tidak melebihi 10MB.',
+            'foto.max' => 'Ukuran foto maksimal adalah 10MB!',
+            'foto.image' => 'File harus berupa gambar.',
+            'foto.mimes' => 'Format gambar harus jpeg, png, atau jpg.',
         ]);
+
 
         if ($request->hasFile('foto')) {
             if ($karyawan->foto) {

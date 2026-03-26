@@ -53,7 +53,14 @@ class DashboardController extends Controller
         $uangMakan = $karyawan->jabatan->uang_makan;
         $bpjsKetenagakerjaan = $karyawan->jabatan->uang_bpjs ?? 0;
 
+        // Sertakan BPJS ke dalam total potongan agar konsisten dengan halaman Data Gaji
+        $totalSemuaPotongan += $bpjsKetenagakerjaan;
+
         $gajiKotor = $gajiPokok + $tunjanganTransport + $uangMakan - $bpjsKetenagakerjaan + $uangLembur;
+        $gajiBersih = $gajiKotor - $totalSemuaPotongan;
+
+        // Total pendapatan (gaji_kotor) tidak mengurangi BPJS, BPJS hanya ada di Total Potongan
+        $gajiKotor = $gajiPokok + $tunjanganTransport + $uangMakan + $uangLembur;
         $gajiBersih = $gajiKotor - $totalSemuaPotongan;
 
         $dataGaji = (object) [
