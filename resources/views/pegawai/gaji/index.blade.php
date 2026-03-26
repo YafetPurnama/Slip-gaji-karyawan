@@ -49,10 +49,25 @@
     </div>
 
     {{-- Container untuk slip gaji yang akan di-refresh oleh AJAX --}}
-    <div class="row">
+    {{-- <div class="row">
         <div class="col-lg-12">
             <div class="card shadow mb-4" id="slipGajiContainer">
                 @include('pegawai.gaji.partials.slip')
+            </div>
+        </div>
+    </div> --}}
+    <div class="row">
+        <div class="col-lg-12">
+            <div class="card shadow mb-4" id="slipGajiContainer">
+                @if ($isLocked)
+                    {{-- TAMPILAN JIKA TERKUNCI SAAT PERTAMA KALI HALAMAN DIMUAT --}}
+                    <div class="card-body text-center py-5">
+                        <i class="fas fa-lock fa-3x text-warning mb-3"></i>
+                        <p class="h5">Slip gaji bulan ini hanya dapat dilihat pada akhir bulan.</p>
+                    </div>
+                @else
+                    @include('pegawai.gaji.partials.slip')
+                @endif
             </div>
         </div>
     </div>
@@ -120,7 +135,7 @@
 
                 // Gunakan URL dengan parameter query
                 let ajaxUrl = "{{ route('pegawai.gaji.index') }}";
-                
+
                 // Gunakan method GET dengan data parameter
                 $.ajax({
                     url: ajaxUrl,

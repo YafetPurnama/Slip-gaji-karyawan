@@ -16,27 +16,46 @@ class DataGajiController extends Controller
     public function index(Request $request)
     {
         $karyawan = Auth::user()->karyawan;
-
         if (!$karyawan || !$karyawan->jabatan) {
             return view('pegawai.dashboard_kosong');
         }
 
-        // Get current date components
         $currentYear = (int)date('Y');
         $currentMonth = (int)date('m');
 
-        // Get employee's start date
         $startDate = $karyawan->tanggal_masuk;
         $startYear = $startDate ? (int)Carbon::parse($startDate)->format('Y') : $currentYear;
         $startMonth = $startDate ? (int)Carbon::parse($startDate)->format('m') : 1;
 
-        // Get selected year and month from request or use current
         $tahun = (int)$request->input('tahun', $currentYear);
         $bulan = (int)$request->input('bulan', $currentMonth);
 
-        // Validate year range
+        $isBulanBerjalan = ($tahun == $currentYear && $bulan == $currentMonth);
+        $isAkhirBulan = Carbon::now()->isLastOfMonth();
+        // $isLocked = ($isBulanBerjalan && !$isAkhirBulan);
+        $isLocked = ($tahun == $currentYear && $bulan == $currentMonth && !\Carbon\Carbon::now()->isLastOfMonth());
+
+        $detailGaji = null;
+        // $isLocked = false;
+        if (!$isLocked) {
+            $detailGaji = $this->hitungGajiPeriode($karyawan, $bulan, $tahun);
+        }
+
         if ($tahun < $startYear || $tahun > $currentYear) {
             $tahun = $currentYear;
+        }
+
+        if ($isBulanBerjalan && !$isAkhirBulan) {
+            $isLocked = true;
+        } else {
+            $detailGaji = $this->hitungGajiPeriode($karyawan, $bulan, $tahun);
+        }
+
+        if ($request->ajax()) {
+            if ($isLocked) {
+                return "<div class='alert alert-warning text-center'>Slip gaji bulan ini hanya dapat dilihat pada akhir bulan.</div>";
+            }
+            return view('pegawai.gaji.partials.slip', compact('karyawan', 'detailGaji', 'bulan', 'tahun'))->render();
         }
 
         // Validate month range based on selected year
@@ -55,8 +74,15 @@ class DataGajiController extends Controller
         $detailGaji = $this->hitungGajiPeriode($karyawan, $bulan, $tahun);
 
         if ($request->ajax()) {
+            if ($isLocked) {
+                return "<div class='alert alert-warning text-center mt-4'>
+                        Slip gaji bulan ini hanya dapat dilihat pada akhir bulan.
+                    </div>";
+            }
             return view('pegawai.gaji.partials.slip', compact('karyawan', 'detailGaji', 'bulan', 'tahun'))->render();
         }
+        $years = range($karyawan->tanggal_masuk ? (int)Carbon::parse($karyawan->tanggal_masuk)->format('Y') : $currentYear, $currentYear);
+        rsort($years);
 
         return view('pegawai.gaji.index', [
             'karyawan' => $karyawan,
@@ -70,6 +96,7 @@ class DataGajiController extends Controller
             'currentMonth' => $currentMonth,
             'minMonth' => $minMonth,
             'maxMonth' => $maxMonth,
+            'isLocked' => $isLocked, // Adding
             'startDate' => $startDate
         ]);
     }
@@ -81,12 +108,19 @@ class DataGajiController extends Controller
             'tahun' => 'required|numeric|digits:4',
         ]);
 
-        $karyawan = Auth::user()->karyawan;
+        $currentYear = (int)date('Y');
+        $currentMonth = (int)date('m');
+
+
         $bulan = $request->bulan;
         $tahun = $request->tahun;
 
-        $slipData = $this->hitungGajiPeriode($karyawan, $bulan, $tahun, true);
+        if (($tahun == $currentYear && $bulan == $currentMonth) && !Carbon::now()->isLastOfMonth()) {
+            return redirect()->back()->with('error', 'Slip gaji bulan berjalan belum dapat dicetak.');
+        }
 
+        $karyawan = Auth::user()->karyawan;
+        $slipData = $this->hitungGajiPeriode($karyawan, $bulan, $tahun, true);
         return view('admin.slip-gaji.print', compact('slipData'));
     }
 

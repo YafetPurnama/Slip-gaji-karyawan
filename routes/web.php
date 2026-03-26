@@ -82,7 +82,7 @@ Route::middleware(['auth', 'role:admin'])->prefix('admin')->group(function () {
     // API for attendance calendar
     Route::get('/kehadiran/{karyawanId}/bulan/{tahunBulan}', [LaporanAbsensiController::class, 'getAttendanceByMonth'])->name('kehadiran.bulan');
     // Route::get('laporan-absensi/attendance-details/{karyawanId}/{bulan}/{tahun}', [LaporanAbsensiController::class, 'getAttendanceDetails'])->name('laporan-absensi.attendance-details');
-    Route::get('admin/laporan-absensi/detail/{karyawanId}/{bulan}/{tahun}', [App\Http\Controllers\Admin\LaporanAbsensiController::class, 'getAttendanceDetails'])->name('laporan.absensi.detail');
+    Route::get('laporan-absensi/detail/{karyawanId}/{bulan}/{tahun}', [LaporanAbsensiController::class, 'getAttendanceDetails'])->name('laporan.absensi.detail');
 
     // Fitur Slip Gaji
     Route::get('slip-gaji', [SlipGajiController::class, 'index'])->name('slip-gaji.index');

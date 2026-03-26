@@ -131,12 +131,67 @@
 
     @endsection
 
+    {{-- Calendar Modal (must be in index, not AJAX partial) --}}
+    <div class="modal fade" id="calendarModal" tabindex="-1" role="dialog" aria-labelledby="calendarModalLabel" aria-hidden="true">
+        <div class="modal-dialog modal-lg" role="document">
+            <div class="modal-content">
+                <div class="modal-header bg-light">
+                    <h5 class="modal-title" id="calendarModalLabel">Detail Kehadiran: <span id="modalKaryawanNama"></span></h5>
+                    <button type="button" class="close" data-dismiss="modal" aria-label="Close">
+                        <span aria-hidden="true">&times;</span>
+                    </button>
+                </div>
+                <div class="modal-body">
+                    <div id="calendarContainer"></div>
+                </div>
+                <div class="modal-footer">
+                    <button type="button" class="btn btn-secondary" data-dismiss="modal">Tutup</button>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    @push('styles')
+    <style>
+        .cal-wrapper { max-width:100%; font-family:'Segoe UI',system-ui,sans-serif; }
+        .cal-header { display:flex; align-items:center; justify-content:space-between; background:linear-gradient(135deg,#43a047,#2e7d32); color:#fff; padding:14px 20px; border-radius:10px 10px 0 0; font-size:1.2rem; font-weight:700; letter-spacing:1px; }
+        .cal-nav-btn { background:rgba(255,255,255,.2); border:none; color:#fff; width:36px; height:36px; border-radius:50%; cursor:pointer; font-size:1rem; transition:background .2s; display:flex; align-items:center; justify-content:center; }
+        .cal-nav-btn:hover { background:rgba(255,255,255,.35); }
+        .cal-month-title { user-select:none; }
+        .cal-day-names { display:grid; grid-template-columns:repeat(7,1fr); background:#f1f8e9; border-left:1px solid #e0e0e0; border-right:1px solid #e0e0e0; }
+        .cal-day-name { text-align:center; padding:10px 0; font-weight:600; font-size:.85rem; color:#2e7d32; }
+        .weekend-name { color:#e53935; }
+        .cal-grid { display:grid; grid-template-columns:repeat(7,1fr); border-left:1px solid #e0e0e0; border-bottom:1px solid #e0e0e0; }
+        .cal-cell { min-height:72px; padding:6px; border-right:1px solid #e0e0e0; border-top:1px solid #e0e0e0; display:flex; flex-direction:column; align-items:center; transition:background .15s; position:relative; }
+        .cal-empty { background:#fafafa; }
+        .cal-day-num { font-weight:600; font-size:.95rem; margin-bottom:4px; color:#333; }
+        .cal-badge { font-size:.65rem; padding:2px 6px; border-radius:10px; color:#fff; font-weight:600; white-space:nowrap; margin-top:auto; }
+        .cal-hadir { background:#e8f5e9; } .cal-hadir .cal-day-num { color:#2e7d32; } .badge-hadir { background:#43a047; }
+        .cal-sakit { background:#e3f2fd; } .cal-sakit .cal-day-num { color:#1565c0; } .badge-sakit { background:#1e88e5; }
+        .cal-alpha { background:#ffebee; } .cal-alpha .cal-day-num { color:#c62828; } .badge-alpha { background:#e53935; }
+        .cal-ijin { background:#fff8e1; } .cal-ijin .cal-day-num { color:#f57f17; } .badge-ijin { background:#fdd835; color:#333!important; }
+        .cal-cuti { background:#f3e5f5; } .cal-cuti .cal-day-num { color:#6a1b9a; } .badge-cuti { background:#8e24aa; }
+        .cal-lembur { background:#fff3e0; } .cal-lembur .cal-day-num { color:#e65100; } .badge-lembur { background:#fb8c00; }
+        .cal-weekend { background:#eceff1; } .cal-weekend .cal-day-num { color:#90a4ae; }
+        .cal-holiday { background:#fce4ec; } .cal-holiday .cal-day-num { color:#c62828; } .badge-holiday { background:#e53935; }
+        .cal-today { box-shadow:inset 0 0 0 2px #43a047; border-radius:4px; }
+        .cal-today .cal-day-num { background:#43a047; color:#fff!important; width:26px; height:26px; border-radius:50%; display:flex; align-items:center; justify-content:center; }
+        .cal-legend { display:flex; flex-wrap:wrap; gap:12px 20px; justify-content:center; padding:12px 16px; margin-top:12px; background:#f5f5f5; border-radius:8px; }
+        .cal-legend-item { display:flex; align-items:center; gap:6px; font-size:.8rem; color:#555; }
+        .legend-dot { width:14px; height:14px; border-radius:3px; display:inline-block; }
+        .bg-hadir { background:#43a047; } .bg-sakit { background:#1e88e5; } .bg-alpha { background:#e53935; }
+        .bg-ijin { background:#fdd835; } .bg-cuti { background:#8e24aa; } .bg-lembur { background:#fb8c00; }
+        .bg-weekend { background:#b0bec5; } .bg-holiday { background:#e53935; border:2px dashed #c62828; }
+        @media(max-width:576px) { .cal-cell{min-height:56px;padding:4px;} .cal-day-num{font-size:.8rem;} .cal-badge{font-size:.55rem;padding:1px 4px;} .cal-header{font-size:1rem;padding:10px 14px;} }
+    </style>
+    @endpush
+
     @push('scripts')
         <script>
             $(document).ready(function() {
                 let searchTimeout;
 
-                // AJAX
+                // ==================== TABLE AJAX ====================
                 function fetchData() {
                     let bulan = $('#bulanFilter').val();
                     let tahun = $('#tahunFilter').val();
@@ -150,12 +205,10 @@
                     $('#printLink').attr('href', printUrl);
                     $('#exportLink').attr('href', exportUrl);
                     $('#laporanAbsensiContainer').html(
-                        // '<div class="card-body text-center py-5"><div class="spinner-border text-primary" role="status"><span class="sr-only">Loading...</span></div></div>'
                         '<div class="card-body d-flex align-items-center justify-content-center" style="min-height: 75vh;">' +
                         '<div class="spinner-border text-primary" style="width: 3rem; height: 3rem;" role="status">' +
                         '<span class="sr-only">Loading...</span>' +
                         '</div></div>'
-
                     );
 
                     let ajaxUrl = "{{ route('laporan-absensi.index') }}?bulan=" + bulan + "&tahun=" + tahun +
@@ -165,6 +218,7 @@
                         url: ajaxUrl,
                         success: function(data) {
                             $('#laporanAbsensiContainer').html(data);
+                            initCalendar(); // Re-bind after AJAX load
                         },
                         error: function() {
                             $('#laporanAbsensiContainer').html(
@@ -178,13 +232,137 @@
 
                 $('#searchInput').on('keyup', function() {
                     clearTimeout(searchTimeout);
-                    searchTimeout = setTimeout(fetchData, 500); // Jeda 500ms
+                    searchTimeout = setTimeout(fetchData, 500);
                 });
 
                 $('#bulanFilter, #tahunFilter').on('change', function() {
                     fetchData();
                 });
 
+                // ==================== CALENDAR ====================
+                let currentKaryawanId, currentBulan, currentTahun, currentKaryawanNama;
+
+                const holidays2025 = {
+                    '2025-01-01':'Tahun Baru','2025-01-27':'Isra Mi\'raj','2025-01-29':'Tahun Baru Imlek',
+                    '2025-03-29':'Nyepi','2025-03-30':'Idul Fitri','2025-03-31':'Idul Fitri',
+                    '2025-04-01':'Cuti Bersama','2025-04-02':'Cuti Bersama','2025-04-03':'Cuti Bersama',
+                    '2025-04-18':'Jumat Agung','2025-05-01':'Hari Buruh','2025-05-12':'Waisak',
+                    '2025-05-29':'Kenaikan Isa Almasih','2025-06-01':'Hari Pancasila','2025-06-06':'Idul Adha',
+                    '2025-06-27':'Tahun Baru Hijriyah','2025-08-17':'HUT RI','2025-09-05':'Maulid Nabi',
+                    '2025-12-25':'Natal','2025-12-26':'Cuti Bersama Natal'
+                };
+                const holidays2026 = {
+                    '2026-01-01':'Tahun Baru','2026-01-16':'Isra Mi\'raj','2026-02-17':'Imlek',
+                    '2026-03-19':'Nyepi','2026-03-20':'Idul Fitri','2026-03-21':'Idul Fitri',
+                    '2026-04-03':'Jumat Agung','2026-05-01':'Hari Buruh','2026-05-02':'Waisak',
+                    '2026-05-14':'Kenaikan Isa Almasih','2026-05-27':'Idul Adha','2026-06-01':'Hari Pancasila',
+                    '2026-06-17':'Tahun Baru Hijriyah','2026-08-17':'HUT RI','2026-08-26':'Maulid Nabi',
+                    '2026-12-25':'Natal'
+                };
+                const allHolidays = {...holidays2025, ...holidays2026};
+                const dayShort = ['Min','Sen','Sel','Rab','Kam','Jum','Sab'];
+                const monthNames = ['Januari','Februari','Maret','April','Mei','Juni','Juli','Agustus','September','Oktober','November','Desember'];
+
+                function getHoliday(d, m, y) {
+                    return allHolidays[`${y}-${String(m).padStart(2,'0')}-${String(d).padStart(2,'0')}`] || null;
+                }
+
+                function buildCalendar(bulan, tahun, data) {
+                    const dim = new Date(tahun, bulan, 0).getDate();
+                    const fdow = new Date(tahun, bulan-1, 1).getDay();
+                    const map = {};
+                    data.forEach(i => { map[new Date(i.tanggal).getDate()] = i; });
+                    const now = new Date();
+
+                    let h = `<div class="cal-wrapper"><div class="cal-header">
+                        <button type="button" class="cal-nav-btn" id="calPrev"><i class="fas fa-chevron-left"></i></button>
+                        <span class="cal-month-title">${monthNames[bulan-1].toUpperCase()} ${tahun}</span>
+                        <button type="button" class="cal-nav-btn" id="calNext"><i class="fas fa-chevron-right"></i></button>
+                    </div><div class="cal-day-names">`;
+
+                    dayShort.forEach((n,i) => { h += `<div class="cal-day-name${i===0||i===6?' weekend-name':''}">${n}</div>`; });
+                    h += '</div><div class="cal-grid">';
+
+                    for (let i=0; i<fdow; i++) h += '<div class="cal-cell cal-empty"></div>';
+
+                    for (let d=1; d<=dim; d++) {
+                        const dt = new Date(tahun, bulan-1, d);
+                        const we = dt.getDay()===0||dt.getDay()===6;
+                        const td = now.getDate()===d && now.getMonth()===bulan-1 && now.getFullYear()===tahun;
+                        const past = dt<=now;
+                        const att = map[d];
+                        const hol = getHoliday(d, bulan, tahun);
+                        let cls='cal-cell', badge='', tip='';
+
+                        if (hol) { cls+=' cal-holiday'; badge='<span class="cal-badge badge-holiday">Libur</span>'; tip=`title="${hol}"`; }
+                        else if (we) { cls+=' cal-weekend'; }
+                        else if (att) {
+                            const s=att.status_kehadiran, lb=att.status_lembur==='Ya';
+                            if(s==='Hadir') cls+=lb?' cal-lembur':' cal-hadir';
+                            else if(s==='Sakit') cls+=' cal-sakit';
+                            else if(s==='Alpha') cls+=' cal-alpha';
+                            else if(s==='Ijin') cls+=' cal-ijin';
+                            else if(s==='Cuti') cls+=' cal-cuti';
+                            badge=`<span class="cal-badge badge-${s.toLowerCase()}">${s}${lb?' <i class="fas fa-clock"></i>':''}</span>`;
+                        } else if (past && !we) { cls+=' cal-alpha'; badge='<span class="cal-badge badge-alpha">Alpha</span>'; }
+                        if (td) cls+=' cal-today';
+
+                        h += `<div class="${cls}" ${tip}><div class="cal-day-num">${d}</div>${badge}</div>`;
+                    }
+
+                    h += '</div><div class="cal-legend">';
+                    h += '<div class="cal-legend-item"><span class="legend-dot bg-hadir"></span> Hadir</div>';
+                    h += '<div class="cal-legend-item"><span class="legend-dot bg-sakit"></span> Sakit</div>';
+                    h += '<div class="cal-legend-item"><span class="legend-dot bg-alpha"></span> Alpha</div>';
+                    h += '<div class="cal-legend-item"><span class="legend-dot bg-ijin"></span> Ijin</div>';
+                    h += '<div class="cal-legend-item"><span class="legend-dot bg-cuti"></span> Cuti</div>';
+                    h += '<div class="cal-legend-item"><span class="legend-dot bg-lembur"></span> Lembur</div>';
+                    h += '<div class="cal-legend-item"><span class="legend-dot bg-weekend"></span> Weekend</div>';
+                    h += '<div class="cal-legend-item"><span class="legend-dot bg-holiday"></span> Libur Nasional</div>';
+                    h += '</div></div>';
+                    return h;
+                }
+
+                function loadCal() {
+                    const c = $('#calendarContainer');
+                    c.html('<div class="text-center py-5"><div class="spinner-border text-primary" style="width:3rem;height:3rem;" role="status"></div><p class="mt-2 text-muted">Memuat data kehadiran...</p></div>');
+                    const ym = `${currentTahun}-${String(currentBulan).padStart(2,'0')}`;
+
+                    $.getJSON(`/admin/kehadiran/${currentKaryawanId}/bulan/${ym}`)
+                        .done(function(data) {
+                            c.html(buildCalendar(currentBulan, currentTahun, data));
+                            $('#calPrev').on('click', function() { navCal(-1); });
+                            $('#calNext').on('click', function() { navCal(1); });
+                        })
+                        .fail(function(xhr) {
+                            c.html('<div class="alert alert-danger">Gagal memuat data. Status: '+xhr.status+'</div>');
+                        });
+                }
+
+                function navCal(dir) {
+                    currentBulan += dir;
+                    if (currentBulan<1) { currentBulan=12; currentTahun--; }
+                    if (currentBulan>12) { currentBulan=1; currentTahun++; }
+                    $('#modalKaryawanNama').text(currentKaryawanNama+' — '+monthNames[currentBulan-1]+' '+currentTahun);
+                    loadCal();
+                }
+
+                function initCalendar() {
+                    $(document).off('click', '.view-calendar');
+                    $(document).on('click', '.view-calendar', function(e) {
+                        e.preventDefault();
+                        currentKaryawanId = $(this).data('karyawan-id');
+                        currentKaryawanNama = $(this).data('karyawan-nama');
+                        currentBulan = parseInt($(this).data('bulan'));
+                        currentTahun = parseInt($(this).data('tahun'));
+
+                        $('#modalKaryawanNama').text(currentKaryawanNama+' — '+monthNames[currentBulan-1]+' '+currentTahun);
+                        $('#calendarModal').modal('show');
+                        loadCal();
+                    });
+                }
+
+                initCalendar();
             });
         </script>
     @endpush

@@ -172,13 +172,17 @@ class LaporanAbsensiController extends Controller
      */
     private function ambilDataAbsensi($bulan, $tahun, $search = null)
     {
+        $endOfSelectedMonth = Carbon::createFromDate($tahun, $bulan, 1)->endOfMonth();
+
         // 1. OPTIMASI QUERY (Eager Loading)
         // Kita ambil data karyawan BESERTA jabatannya DAN kehadirannya di bulan tsb sekaligus.
         // Perhatikan: kita pakai 'kehadirans' (sesuai nama fungsi di Model Langkah 1)
         $query = Karyawan::with(['jabatan', 'kehadirans' => function ($q) use ($bulan, $tahun) {
             $q->whereMonth('tanggal', $bulan)
                 ->whereYear('tanggal', $tahun);
-        }])->orderBy('nama_lengkap');
+        }])
+            ->where('tanggal_masuk', '<=', $endOfSelectedMonth->format('Y-m-d'))
+            ->orderBy('nama_lengkap');
 
         // 2. Filter pencarian nama
         if ($search) {

@@ -23,17 +23,19 @@ class GantiPasswordController extends Controller
      */
     public function update(Request $request)
     {
-        // 1. Validasi input
+        // Validasi input
         $request->validate([
             'current_password' => ['required', 'current_password'],
             'password' => ['required', Password::defaults(), 'confirmed'],
         ]);
 
-        $user = Auth::user();
+        // $user = Auth::user();
+        // $user->password = Hash::make($request->password);
+        // $user->save();
+        $user = \App\Models\User::find(Auth::id());
         $user->password = Hash::make($request->password);
-        $user->save(); 
+        $user->save();
 
-        // 3. Kirim respons JSON yang menandakan sukses
         return response()->json([
             'success' => true,
             'message' => 'Password Anda berhasil diubah.'

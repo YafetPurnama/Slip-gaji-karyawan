@@ -38,82 +38,92 @@
                         ({{ \Carbon\Carbon::now()->translatedFormat('F Y') }})</h6>
                 </div>
                 <div class="card-body">
-                    <div class="table-responsive">
-                        <table class="table table-borderless">
-                            <tbody>
-                                <tr>
-                                    <td>Gaji Pokok</td>
-                                    <td class="text-right font-weight-bold">Rp
-                                        {{ number_format($dataGaji->gaji_pokok, 0, ',', '.') }}</td>
-                                </tr>
-                                <tr>
-                                    <td>Tunjangan Transport</td>
-                                    <td class="text-right font-weight-bold">Rp
-                                        {{ number_format($dataGaji->tunjangan_transport, 0, ',', '.') }}</td>
-                                </tr>
-                                <tr>
-                                    <td>Uang Makan</td>
-                                    <td class="text-right font-weight-bold">Rp
-                                        {{ number_format($dataGaji->uang_makan, 0, ',', '.') }}</td>
-                                </tr>
-                                <tr>
-                                    <td>BPJS Ketenagakerjaan</td>
-                                    {{-- <td class="text-right font-weight-bold">Rp --}}
-                                    <td class="text-right font-weight-bold text-danger">- Rp
-                                        {{ number_format($dataGaji->bpjs_ketenagakerjaan, 0, ',', '.') }}</td>
-                                </tr>
-                                <tr>
-                                    <td>Uang Lembur ({{ $dataGaji->jumlah_lembur }}x)</td>
-                                    <td class="text-right font-weight-bold">+ Rp
-                                        {{ number_format($dataGaji->uang_lembur, 0, ',', '.') }}</td>
-                                </tr>
-                                <tr class="border-top">
-                                    <th>Total Pendapatan</th>
-                                    <th class="text-right">Rp {{ number_format($dataGaji->gaji_kotor, 0, ',', '.') }}</th>
-                                </tr>
-                                <tr>
-                                    <td>Total Potongan</td>
-                                    <td class="text-right font-weight-bold text-danger">- Rp
-                                        {{ number_format($dataGaji->potongan, 0, ',', '.') }}</td>
-                                </tr>
-                                <tr class="bg-light">
-                                    <th class="h5">Gaji Bersih</th>
-                                    <th class="text-right h5">Rp {{ number_format($dataGaji->gaji_bersih, 0, ',', '.') }}
-                                    </th>
-                                </tr>
-                            </tbody>
-                        </table>
-                    </div>
+                    @if ($isAkhirBulan && $dataGaji)
+                        <div class="table-responsive">
+                            <table class="table table-borderless">
+                                <tbody>
+                                    <tr>
+                                        <td>Gaji Pokok</td>
+                                        <td class="text-right font-weight-bold">Rp
+                                            {{ number_format($dataGaji->gaji_pokok, 0, ',', '.') }}</td>
+                                    </tr>
+                                    <tr>
+                                        <td>Tunjangan Transport</td>
+                                        <td class="text-right font-weight-bold">Rp
+                                            {{ number_format($dataGaji->tunjangan_transport, 0, ',', '.') }}</td>
+                                    </tr>
+                                    <tr>
+                                        <td>Uang Makan</td>
+                                        <td class="text-right font-weight-bold">Rp
+                                            {{ number_format($dataGaji->uang_makan, 0, ',', '.') }}</td>
+                                    </tr>
+                                    <tr>
+                                        <td>BPJS Ketenagakerjaan</td>
+                                        <td class="text-right font-weight-bold text-danger">- Rp
+                                            {{ number_format($dataGaji->bpjs_ketenagakerjaan, 0, ',', '.') }}</td>
+                                    </tr>
+                                    <tr>
+                                        <td>Uang Lembur ({{ $dataGaji->jumlah_lembur }}x)</td>
+                                        <td class="text-right font-weight-bold">+ Rp
+                                            {{ number_format($dataGaji->uang_lembur, 0, ',', '.') }}</td>
+                                    </tr>
+                                    <tr class="border-top">
+                                        <th>Total Pendapatan</th>
+                                        <th class="text-right">Rp {{ number_format($dataGaji->gaji_kotor, 0, ',', '.') }}
+                                        </th>
+                                    </tr>
+                                    <tr>
+                                        <td>Total Potongan</td>
+                                        <td class="text-right font-weight-bold text-danger">- Rp
+                                            {{ number_format($dataGaji->potongan, 0, ',', '.') }}</td>
+                                    </tr>
+                                    <tr class="bg-light">
+                                        <th class="h5">Gaji Bersih</th>
+                                        <th class="text-right h5">Rp
+                                            {{ number_format($dataGaji->gaji_bersih, 0, ',', '.') }}</th>
+                                    </tr>
+                                </tbody>
+                            </table>
+                        </div>
+                    @else
+                        {{-- TAMPILAN JIKA DATA MASIH TERKUNCI --}}
+                        <div class="text-center py-5">
+                            <i class="fas fa-lock fa-3x text-gray-300 mb-3"></i>
+                            <p class="text-gray-500">Rincian gaji bulan berjalan akan ditampilkan secara otomatis pada akhir
+                                bulan.</p>
+                            <div class="badge badge-warning">Status: Menunggu Penutupan Periode</div>
+                        </div>
+                    @endif
                 </div>
             </div>
-
-            <div class="row">
-                <div class="col-md-4 mb-4">
-                    <div class="card border-left-success h-100 py-2">
-                        <div class="card-body">
-                            <div class="text-xs font-weight-bold text-success text-uppercase mb-1">Hadir</div>
-                            <div class="h5 mb-0 font-weight-bold">{{ $jumlahHadir }} Hari</div>
-                        </div>
-                    </div>
-                </div>
-                <div class="col-md-4 mb-4">
-                    <div class="card border-left-info h-100 py-2">
-                        <div class="card-body">
-                            <div class="text-xs font-weight-bold text-info text-uppercase mb-1">Sakit</div>
-                            <div class="h5 mb-0 font-weight-bold">{{ $jumlahSakit }} Hari</div>
-                        </div>
-                    </div>
-                </div>
-                <div class="col-md-4 mb-4">
-                    <div class="card border-left-danger h-100 py-2">
-                        <div class="card-body">
-                            <div class="text-xs font-weight-bold text-danger text-uppercase mb-1">Alpha</div>
-                            <div class="h5 mb-0 font-weight-bold">{{ $jumlahAlpha }} Hari</div>
-                        </div>
-                    </div>
-                </div>
-            </div>
-
         </div>
+
+        <div class="row">
+            <div class="col-md-4 mb-4">
+                <div class="card border-left-success h-100 py-2">
+                    <div class="card-body">
+                        <div class="text-xs font-weight-bold text-success text-uppercase mb-1">Hadir</div>
+                        <div class="h5 mb-0 font-weight-bold">{{ $jumlahHadir }} Hari</div>
+                    </div>
+                </div>
+            </div>
+            <div class="col-md-4 mb-4">
+                <div class="card border-left-info h-100 py-2">
+                    <div class="card-body">
+                        <div class="text-xs font-weight-bold text-info text-uppercase mb-1">Sakit</div>
+                        <div class="h5 mb-0 font-weight-bold">{{ $jumlahSakit }} Hari</div>
+                    </div>
+                </div>
+            </div>
+            <div class="col-md-4 mb-4">
+                <div class="card border-left-danger h-100 py-2">
+                    <div class="card-body">
+                        <div class="text-xs font-weight-bold text-danger text-uppercase mb-1">Alpha</div>
+                        <div class="h5 mb-0 font-weight-bold">{{ $jumlahAlpha }} Hari</div>
+                    </div>
+                </div>
+            </div>
+        </div>
+
     </div>
 @endsection

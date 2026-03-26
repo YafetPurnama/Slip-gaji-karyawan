@@ -87,7 +87,7 @@ class LaporanGajiController extends Controller
             'laporanGaji',
             'bulan',
             'tahun',
-            'bulanNama'          // <- dikirim ke view print
+            'bulanNama'
         ));
     }
 
@@ -122,9 +122,10 @@ class LaporanGajiController extends Controller
     private function hitungGajiPeriode($bulan, $tahun, $search = null)
     {
         $endOfSelectedMonth = Carbon::createFromDate($tahun, $bulan, 1)->endOfMonth();
+        $startOfSelectedMonth = Carbon::createFromDate($tahun, $bulan, 1)->startOfMonth();
 
         $query = Karyawan::with('jabatan')
-            ->whereDate('tanggal_masuk', '<=', $endOfSelectedMonth);
+            ->where('tanggal_masuk', '<=', $endOfSelectedMonth->format('Y-m-d'));
 
         if ($search) {
             $query->where('nama_lengkap', 'like', '%' . $search . '%');
