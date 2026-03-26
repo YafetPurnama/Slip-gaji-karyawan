@@ -2,7 +2,6 @@
 
 {{-- @push('styles')
     <style>
-        /* Ensure the content takes at least the full viewport height minus header and footer */
         #content-wrapper {
             min-height: calc(100vh - 56px);
             /* 56px is the height of the navbar */
