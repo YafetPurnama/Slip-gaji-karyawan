@@ -30,3 +30,5 @@ env.txt
 /info.txt
 /db_sistem_penggajian.sql
 summary.md
+
+defaultdb_fix.sql

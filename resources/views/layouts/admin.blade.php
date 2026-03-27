@@ -40,15 +40,109 @@
         /* 2. SIDEBAR BASE (Desktop Default: Muncul) */
         .sidebar {
             width: 16rem;
-            min-width: 16rem; /* Mencegah penyusutan tak wajar */
-            /* 250px */
+            min-width: 16rem;
             min-height: 100vh;
             background-color: #4e73df;
-            transition: width 0.3s cubic-bezier(0.4, 0, 0.2, 1), min-width 0.3s cubic-bezier(0.4, 0, 0.2, 1), transform 0.3s cubic-bezier(0.4, 0, 0.2, 1);
-            /* Animasi lebih natural */
+            transition: width 0.3s cubic-bezier(0.4, 0, 0.2, 1),
+                        min-width 0.3s cubic-bezier(0.4, 0, 0.2, 1),
+                        transform 0.3s cubic-bezier(0.4, 0, 0.2, 1);
             z-index: 1040;
-            /* Pastikan di atas konten standard */
             position: relative;
+        }
+
+        /* === SIDEBAR MENU ITEMS - ALIGNMENT FIX === */
+        .sidebar .nav-item .nav-link {
+            display: flex;
+            align-items: center;
+            padding: 0.75rem 1.25rem;
+            font-size: 0.88rem;
+            font-weight: 500;
+            color: rgba(255, 255, 255, 0.85);
+            transition: all 0.2s ease;
+            white-space: nowrap;
+        }
+
+        .sidebar .nav-item .nav-link:hover {
+            color: #fff;
+            background-color: rgba(255, 255, 255, 0.1);
+        }
+
+        .sidebar .nav-item.active > .nav-link {
+            color: #fff;
+            font-weight: 600;
+            background-color: rgba(255, 255, 255, 0.15);
+            border-left: 4px solid #fff;
+            padding-left: calc(1.25rem - 4px);
+        }
+
+        .sidebar .nav-link i {
+            width: 1.5rem;
+            text-align: center;
+            margin-right: 0.65rem;
+            font-size: 0.95rem;
+            flex-shrink: 0;
+        }
+
+        .sidebar .nav-link span {
+            line-height: 1.4;
+        }
+
+        /* === SIDEBAR HEADING (Section Labels) === */
+        .sidebar .sidebar-heading {
+            padding: 0.5rem 1.25rem;
+            font-size: 0.65rem;
+            font-weight: 800;
+            text-transform: uppercase;
+            letter-spacing: 0.08em;
+            color: rgba(255, 255, 255, 0.45);
+            text-align: left;
+        }
+
+        /* === SIDEBAR BRAND (Logo) === */
+        .sidebar .sidebar-brand {
+            padding: 1rem;
+            min-height: auto;
+        }
+
+        .sidebar .sidebar-brand img {
+            height: 80px;
+            width: auto;
+            max-width: 160px;
+        }
+
+        /* === SUBMENU ITEMS === */
+        .sidebar .collapse-inner {
+            padding: 0.5rem 0;
+            margin: 0 0.75rem;
+            border-radius: 0.5rem;
+            box-shadow: 0 2px 8px rgba(0, 0, 0, 0.08);
+        }
+
+        .sidebar .collapse-item {
+            padding: 0.5rem 1rem;
+            font-size: 0.82rem;
+            font-weight: 500;
+            display: block;
+            color: #3a3b45;
+            transition: all 0.15s ease;
+        }
+
+        .sidebar .collapse-item:hover {
+            background-color: #eaecf4;
+            color: #4e73df;
+            text-decoration: none;
+        }
+
+        .sidebar .collapse-item.active {
+            color: #4e73df;
+            font-weight: 700;
+            background-color: #e8ecfa;
+        }
+
+        /* === SIDEBAR DIVIDER === */
+        .sidebar hr.sidebar-divider {
+            margin: 0.5rem 1rem;
+            border-top: 1px solid rgba(255, 255, 255, 0.15);
         }
 
         /* 3. CONTENT WRAPPER */
@@ -57,7 +151,6 @@
             display: flex;
             flex-direction: column;
             width: 100%;
-            /* Fix flexbox overflow issue */
             min-width: 0;
             overflow-x: hidden;
         }
@@ -66,12 +159,9 @@
         @media (min-width: 768px) {
             .sidebar {
                 position: relative;
-                /* Sidebar ikut aliran dokumen */
                 margin-left: 0;
-                /* Default Muncul */
             }
 
-            /* Saat tombol ditekan di desktop (Sidebar disembunyikan area width jadi 0) */
             body.sidebar-toggled .sidebar {
                 width: 0 !important;
                 min-width: 0 !important;
@@ -83,24 +173,20 @@
         @media (max-width: 767.98px) {
             .sidebar {
                 position: fixed;
-                /* Melayang */
                 top: 0;
                 left: 0;
                 height: 100vh;
+                width: 16rem;
+                min-width: 16rem;
                 transform: translateX(-100%);
-                /* Sembunyi di kiri dengan transform yang smooth */
                 z-index: 2000;
-                /* WAJIB Lebih tinggi dari Navbar */
-                box-shadow: 4px 0 24px rgba(0, 0, 0, 0.15);
+                box-shadow: 4px 0 24px rgba(0, 0, 0, 0.2);
             }
 
-            /* Saat tombol ditekan di mobile (Sidebar dimunculkan) */
             body.sidebar-open .sidebar {
                 transform: translateX(0);
-                /* Geser masuk ke layar */
             }
 
-            /* Backdrop Gelap saat menu mobile aktif */
             body.sidebar-open::after {
                 content: "";
                 position: fixed;
@@ -110,49 +196,47 @@
                 bottom: 0;
                 background: rgba(0, 0, 0, 0.5);
                 z-index: 1900;
-                /* Di bawah sidebar, di atas konten */
                 backdrop-filter: blur(2px);
-                /* Efek blur modern */
                 animation: fadeIn 0.3s;
+            }
+
+            /* Mobile logo slightly smaller */
+            .sidebar .sidebar-brand img {
+                height: 60px;
+                max-width: 140px;
             }
         }
 
         /* Animasi Fade In untuk Backdrop */
         @keyframes fadeIn {
-            from {
-                opacity: 0;
-            }
-
-            to {
-                opacity: 1;
-            }
+            from { opacity: 0; }
+            to { opacity: 1; }
         }
 
         /* 4. SCROLLBAR CANTIK */
         .sidebar-menu-wrapper {
-            height: calc(100vh - 4.375rem);
-            overflow-y: auto;
-            scrollbar-width: none;
-            /* Firefox */
-        }
-
-        /* ::-webkit-scrollbar  */
-        .sidebar-menu-wrapper {
-            /* display: none; */
-            /* Chrome */
             flex: 1;
             overflow-y: auto;
             scrollbar-width: thin;
-            scrollbar-color: rgba(255, 255, 255, 0.2) transparent
+            scrollbar-color: rgba(255, 255, 255, 0.2) transparent;
+            padding-bottom: 1rem;
         }
 
-        /* Style untuk tombol toggle baru */
+        .sidebar-menu-wrapper::-webkit-scrollbar {
+            width: 4px;
+        }
+
+        .sidebar-menu-wrapper::-webkit-scrollbar-thumb {
+            background-color: rgba(255, 255, 255, 0.25);
+            border-radius: 4px;
+        }
+
+        /* Style untuk tombol toggle */
         .sidebar-toggler {
             color: rgba(255, 255, 255, 0.5);
             padding-right: 0.75rem;
         }
 
-        .sidebar-toggler:hover,
         .sidebar-toggler:hover,
         .sidebar-toggler:focus {
             color: #fff;
