@@ -112,4 +112,4 @@ Akses langsung:
 
 ## 📸 Preview
 
-![Preview Aplikasi](public\images\review-HRIS.png)
+![Preview Aplikasi](public/images/review-HRIS.png)
